@@ -1,19 +1,19 @@
 # market-data-fetcher
 
-MCP Server for fetching market data from Longport API and AKShare, supporting Hong Kong and US stock market data including indices, stocks, and ETFs.
+MCP Server for fetching market data from Longport API, AKShare, and Yahoo Finance (yfinance), supporting Hong Kong and US stock market data including indices, stocks, and ETFs.
 
 ## Features
 
 - Fetch Hong Kong and US index data (HSI, HSTECH, HSCEI, S&P 500, Nasdaq 100, Dow Jones)
-- Fetch Hong Kong stock data
+- Fetch Hong Kong and US stock data
 - Fetch Hong Kong and US ETF data
-- Support multiple data sources: Longport API, AKShare (Sina Finance)
-- Automatic fallback from Longport to AKShare
+- Support multiple data sources: Longport API, AKShare (Sina Finance), Yahoo Finance (yfinance)
+- Automatic fallback chain: Longport → Yahoo Finance → AKShare
 - Configurable target list via `targets.json`
 
 ## Installation
 
-### Basic Installation (AKShare only, free)
+### Basic Installation (includes AKShare + yfinance, both free)
 
 ```bash
 pip install market-data-fetcher
@@ -55,7 +55,7 @@ export LONGPORT_APP_SECRET="your_app_secret"
 export LONGPORT_ACCESS_TOKEN="your_access_token"
 ```
 
-If you only use AKShare (free, no registration required), you can skip this step.
+If you only use AKShare and yfinance (both free, no registration required), you can skip this step.
 
 ### 3. Configure MCP in TRAE CN
 
@@ -135,7 +135,7 @@ In TRAE CN, you can add MCP Server through the GUI. Follow these steps:
 4. Click **Confirm** (确认) button.
 
 > **Notes**:
-> - Replace `your_app_key`, `your_app_secret`, `your_access_token` with your actual Longport credentials. If you only use AKShare (free), you can omit the `LONGPORT_*` environment variables.
+> - Replace `your_app_key`, `your_app_secret`, `your_access_token` with your actual Longport credentials. If you only use AKShare/yfinance (free), you can omit the `LONGPORT_*` environment variables.
 > - Replace `/absolute/path/to/your/project/targets.json` with the actual absolute path to your `targets.json` file. You can also use `${workspaceFolder}/targets.json` to reference the current project root.
 > - If you use `uvx`, make sure [uv](https://github.com/astral-sh/uv) is installed. Install with: `curl -LsSf https://astral.sh/uv/install.sh | sh` (macOS/Linux) or `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"` (Windows).
 > - If you use `python` or `market-data-fetcher` command, make sure the package is installed first (`pip install market-data-fetcher` or `pip install -e .`).
@@ -253,7 +253,7 @@ Fetch latest index data for Hong Kong and US markets.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `source` | String | `"longport"` | Data source: `"longport"`, `"akshare"`, or `"both"` |
+| `source` | String | `"longport"` | Data source: `"longport"`, `"akshare"`, `"yfinance"`, or `"both"` |
 
 **Returns:** JSON string containing index data with fields: `name`, `code`, `price`, `timestamp`, `source`.
 
@@ -263,7 +263,7 @@ Fetch latest index data for Hong Kong and US markets.
 {
   "data": [
     { "name": "恒生指数", "code": "HSI", "price": 22423.02, "timestamp": "2025-05-01 16:00:00 (北京时间)", "source": "AKShare" },
-    { "name": "标普500指数", "code": ".SPX", "price": 5604.14, "timestamp": "2025-05-01 16:00:00 (美东时间)", "source": "AKShare" }
+    { "name": "标普500指数", "code": ".SPX", "price": 5604.14, "timestamp": "2025-05-01 16:00:00 (美东时间)", "source": "Yahoo Finance" }
   ],
   "count": 2
 }
@@ -271,14 +271,14 @@ Fetch latest index data for Hong Kong and US markets.
 
 ### `fetch_stock_data`
 
-Fetch latest stock data for Hong Kong stocks.
+Fetch latest stock data for Hong Kong and US stocks.
 
 **Parameters:**
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `codes` | List[String] or null | `null` | Optional list of stock codes to fetch (e.g., `["00700.HK", "09988.HK"]`). If not provided, fetches all stocks from `targets.json`. |
-| `source` | String | `"longport"` | Data source: `"longport"` or `"akshare"` |
+| `source` | String | `"longport"` | Data source: `"longport"`, `"akshare"`, `"yfinance"`, or `"both"` |
 
 **Returns:** JSON string containing stock data with fields: `name`, `code`, `price`, `timestamp`, `source`.
 
@@ -291,7 +291,7 @@ Fetch latest ETF data for Hong Kong and US ETFs.
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `codes` | List[String] or null | `null` | Optional list of ETF codes to fetch (e.g., `["02800.HK", "03033.HK"]`). If not provided, fetches all ETFs from `targets.json`. |
-| `source` | String | `"longport"` | Data source: `"longport"` or `"akshare"` |
+| `source` | String | `"longport"` | Data source: `"longport"`, `"akshare"`, `"yfinance"`, or `"both"` |
 
 **Returns:** JSON string containing ETF data with fields: `name`, `code`, `price`, `timestamp`, `source`.
 
@@ -303,7 +303,7 @@ Fetch all market data at once: indices, stocks, and ETFs.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `source` | String | `"longport"` | Data source: `"longport"`, `"akshare"`, or `"both"` |
+| `source` | String | `"longport"` | Data source: `"longport"`, `"akshare"`, `"yfinance"`, or `"both"` |
 
 **Returns:** JSON string containing all market data grouped by type (`index_data`, `stock_data`, `etf_data`).
 
@@ -344,7 +344,17 @@ Check if Longport SDK is available and credentials are configured.
 - No registration or API key required
 - Data sourced from Sina Finance
 - Supports Hong Kong indices (HSI, HSTECH, HSCEI), US indices (.NDX, .SPX, .DJI), Hong Kong stocks and ETFs
+- **Does not support US ETFs**; US ETF data will be automatically fetched via yfinance when using `source="akshare"`
 - May have rate limiting; built-in delays between requests
+
+### Yahoo Finance / yfinance (Free)
+
+- No registration or API key required
+- Data sourced from Yahoo Finance
+- Excellent US market coverage: US stocks, US ETFs (QQQ, SPY, etc.), US indices
+- Also supports Hong Kong stocks, ETFs, and indices
+- Install with: `pip install yfinance` (included by default)
+- May experience rate limiting with frequent requests
 
 ### Longport API
 
@@ -355,7 +365,13 @@ Check if Longport SDK is available and credentials are configured.
 
 ### Fallback Strategy (`source="both"`)
 
-When using `source="both"`, the server first tries Longport for all instruments. For any instruments where Longport fails to return a price, it falls back to AKShare to fill in the gaps.
+When using `source="both"`, the server follows a three-level fallback chain:
+
+1. **Longport** — tried first for all instruments
+2. **Yahoo Finance** — fills in any instruments where Longport failed
+3. **AKShare** — final fallback for any instruments still missing data
+
+This ensures maximum data availability across all markets.
 
 ## Usage in TRAE CN
 
