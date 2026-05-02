@@ -72,19 +72,23 @@ In TRAE CN, you can add MCP Server through the GUI. Follow these steps:
 2. The **Manual Configuration** (手动配置) window will appear.
 3. Paste the following JSON configuration into the input box:
 
-**Using `uvx` (recommended, no installation required):**
+**Using `uvx` (recommended, no installation required, fetches from GitHub):**
 
 ```json
 {
   "mcpServers": {
     "market-data-fetcher": {
       "command": "uvx",
-      "args": ["market-data-fetcher"],
+      "args": [
+        "--from",
+        "git+https://github.com/xhqing/market_data_fetcher.git",
+        "market-data-fetcher"
+      ],
       "env": {
         "LONGPORT_APP_KEY": "your_app_key",
         "LONGPORT_APP_SECRET": "your_app_secret",
         "LONGPORT_ACCESS_TOKEN": "your_access_token",
-        "TARGETS_JSON_PATH": "/absolute/path/to/your/project/targets.json"
+        "TARGETS_JSON_PATH": "${workspaceFolder}/targets.json"
       }
     }
   }
@@ -353,9 +357,9 @@ Check if Longport SDK is available and credentials are configured.
 
 When using `source="both"`, the server first tries Longport for all instruments. For any instruments where Longport fails to return a price, it falls back to AKShare to fill in the gaps.
 
-## Usage in Trae IDE
+## Usage in TRAE CN
 
-Once the MCP server is configured in `.trae/mcp.json`, you can interact with it through the AI assistant in Trae IDE. For example:
+Once the MCP Server is configured and added to an agent, you can interact with it through the AI assistant in TRAE CN. For example:
 
 - "帮我获取港股和美股的最新指数数据"
 - "查询腾讯和阿里巴巴的最新股价"
