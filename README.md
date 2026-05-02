@@ -57,50 +57,22 @@ export LONGPORT_ACCESS_TOKEN="your_access_token"
 
 If you only use AKShare (free, no registration required), you can skip this step.
 
-### 3. Configure MCP in Trae IDE
+### 3. Configure MCP in TRAE CN
 
-Edit or create the `.trae/mcp.json` file in your project root:
+In TRAE CN, you can add MCP Server through the GUI. Follow these steps:
 
-```json
-{
-  "mcpServers": {
-    "market-data-fetcher": {
-      "command": "python",
-      "args": ["-m", "market_data_fetcher.server"],
-      "cwd": "/absolute/path/to/your/project",
-      "env": {
-        "LONGPORT_APP_KEY": "your_app_key",
-        "LONGPORT_APP_SECRET": "your_app_secret",
-        "LONGPORT_ACCESS_TOKEN": "your_access_token",
-        "TARGETS_JSON_PATH": "/absolute/path/to/your/project/targets.json"
-      }
-    }
-  }
-}
-```
+#### Step 1: Open MCP Settings
 
-> **Note**: Replace `/absolute/path/to/your/project` with the actual absolute path to your project directory. If you don't use Longport, you can omit the `LONGPORT_*` environment variables.
+- In **IDE mode**: Click the **Settings** icon in the top-right corner of the IDE, then select **MCP**.
+- In **SOLO mode**: Click the **Settings** icon in the top-right corner of the AI chat panel, then select **MCP**.
 
-If you installed the package and prefer using the entry point command:
+#### Step 2: Add MCP Server Manually
 
-```json
-{
-  "mcpServers": {
-    "market-data-fetcher": {
-      "command": "market-data-fetcher",
-      "cwd": "/absolute/path/to/your/project",
-      "env": {
-        "LONGPORT_APP_KEY": "your_app_key",
-        "LONGPORT_APP_SECRET": "your_app_secret",
-        "LONGPORT_ACCESS_TOKEN": "your_access_token",
-        "TARGETS_JSON_PATH": "/absolute/path/to/your/project/targets.json"
-      }
-    }
-  }
-}
-```
+1. In the MCP window, click the **+ Add** button in the top-right corner, then select **Manually Add** (手动添加).
+2. The **Manual Configuration** (手动配置) window will appear.
+3. Paste the following JSON configuration into the input box:
 
-If you want to use `uvx` to run without installing:
+**Using `uvx` (recommended, no installation required):**
 
 ```json
 {
@@ -108,7 +80,6 @@ If you want to use `uvx` to run without installing:
     "market-data-fetcher": {
       "command": "uvx",
       "args": ["market-data-fetcher"],
-      "cwd": "/absolute/path/to/your/project",
       "env": {
         "LONGPORT_APP_KEY": "your_app_key",
         "LONGPORT_APP_SECRET": "your_app_secret",
@@ -120,9 +91,67 @@ If you want to use `uvx` to run without installing:
 }
 ```
 
-### 4. Restart Trae IDE
+**Using `python -m` (requires pip install first):**
 
-After configuring `.trae/mcp.json`, restart Trae IDE or reload the MCP servers to activate the market-data-fetcher service.
+```json
+{
+  "mcpServers": {
+    "market-data-fetcher": {
+      "command": "python",
+      "args": ["-m", "market_data_fetcher.server"],
+      "env": {
+        "LONGPORT_APP_KEY": "your_app_key",
+        "LONGPORT_APP_SECRET": "your_app_secret",
+        "LONGPORT_ACCESS_TOKEN": "your_access_token",
+        "TARGETS_JSON_PATH": "/absolute/path/to/your/project/targets.json"
+      }
+    }
+  }
+}
+```
+
+**Using entry point command (requires pip install first):**
+
+```json
+{
+  "mcpServers": {
+    "market-data-fetcher": {
+      "command": "market-data-fetcher",
+      "env": {
+        "LONGPORT_APP_KEY": "your_app_key",
+        "LONGPORT_APP_SECRET": "your_app_secret",
+        "LONGPORT_ACCESS_TOKEN": "your_access_token",
+        "TARGETS_JSON_PATH": "/absolute/path/to/your/project/targets.json"
+      }
+    }
+  }
+}
+```
+
+4. Click **Confirm** (确认) button.
+
+> **Notes**:
+> - Replace `your_app_key`, `your_app_secret`, `your_access_token` with your actual Longport credentials. If you only use AKShare (free), you can omit the `LONGPORT_*` environment variables.
+> - Replace `/absolute/path/to/your/project/targets.json` with the actual absolute path to your `targets.json` file. You can also use `${workspaceFolder}/targets.json` to reference the current project root.
+> - If you use `uvx`, make sure [uv](https://github.com/astral-sh/uv) is installed. Install with: `curl -LsSf https://astral.sh/uv/install.sh | sh` (macOS/Linux) or `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"` (Windows).
+> - If you use `python` or `market-data-fetcher` command, make sure the package is installed first (`pip install market-data-fetcher` or `pip install -e .`).
+
+#### Step 3: Add MCP Server to Agent
+
+After adding the MCP Server, you need to add it to an agent to use it:
+
+- **Built-in Agent**: The MCP Server will be automatically added to the built-in **Builder with MCP** agent.
+- **Custom Agent**: You can add the MCP Server to a custom agent by:
+  1. Going to the MCP Server list.
+  2. Clicking the **+** button on the right side of the target MCP Server.
+  3. Selecting the agent(s) you want to add the MCP Server to.
+  4. Clicking **Confirm** (确认).
+
+  Alternatively, when creating a new custom agent, you can add MCP Servers in the **Tools** (工具) section of the agent creation panel.
+
+#### Step 4: Verify Configuration
+
+After adding the MCP Server, check that a green checkmark (✓) appears next to it in the MCP list, indicating it is running properly. If a red cross (✗) appears, check the configuration and logs for errors.
 
 ## Configuration
 
