@@ -167,6 +167,7 @@ After adding the MCP Server, check that a green checkmark (✓) appears next to 
 | `LONGPORT_APP_SECRET` | Longport API App Secret | For Longport source | Empty |
 | `LONGPORT_ACCESS_TOKEN` | Longport API Access Token | For Longport source | Empty |
 | `TARGETS_JSON_PATH` | Absolute path to `targets.json` | Optional | `<cwd>/targets.json` |
+| `YFINANCE_PROXY` | HTTP proxy for yfinance (e.g., `http://127.0.0.1:7890`) | Optional, needed in China | Empty |
 
 ### targets.json Configuration
 
@@ -355,6 +356,7 @@ Check if Longport SDK is available and credentials are configured.
 - Also supports Hong Kong stocks, ETFs, and indices
 - Install with: `pip install yfinance` (included by default)
 - May experience rate limiting with frequent requests
+- **In China**: Yahoo Finance may be inaccessible; set `YFINANCE_PROXY` environment variable to use an HTTP proxy (e.g., `http://127.0.0.1:7890`)
 
 ### Longport API
 
