@@ -399,6 +399,6 @@ market-data-fetcher
 python -m market_data_fetcher.server
 ```
 
-## License
+## Copyright
 
-AGPL-3.0
+Copyright © 2026 xhqing. All rights reserved.
